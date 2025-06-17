@@ -1,10 +1,10 @@
+#include <signal.h>
 #include "ft_ping.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     t_ping ping;
-    memset(&ping, 0, sizeof(ping));
+    memset(&ping, 0, sizeof(t_ping));
     ping.pid = getpid();
-    
 
     parse_args(argc, argv, &ping);
     resolve_host(ping.hostname, &ping);
@@ -17,6 +17,17 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
-    send_ping(&ping);
-}
+    signal(SIGINT, int_handler);
+    gettimeofday(&ping.start_time, NULL);
 
+    int seq = 1;
+    while (g_running) {
+        send_ping(&ping, seq);
+        receive_ping(&ping);
+        seq++;
+        sleep(1);
+    }
+
+    print_statistics(&ping);
+    return 0;
+}
