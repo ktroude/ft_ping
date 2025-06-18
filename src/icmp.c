@@ -1,5 +1,21 @@
 #include "ft_ping.h"
 
+/*
+** ICMP Echo Request Packet Structure (Type 8):
+**
+** An ICMP Echo Request packet consists of the following fields:
+**
+**   - icmp_type   : Should be set to ICMP_ECHO (value 8)
+**   - icmp_code   : Always 0 for Echo Request
+**   - icmp_id     : Identifier used to match requests and replies (commonly the process PID)
+**   - icmp_seq    : Sequence number, usually incremented with each request
+**   - icmp_cksum  : 16-bit checksum covering the entire ICMP message
+**   - icmp_data   : Optional payload data (can be arbitrary, e.g. ASCII or pattern bytes)
+**
+** This structure is used to send a "ping" to a destination IP address.
+** The corresponding Echo Reply (type 0) should return the same `id`, `seq`, and `data` values.
+*/
+
 /**
  * @brief Constructs an ICMP Echo Request packet with predefined payload.
  *
