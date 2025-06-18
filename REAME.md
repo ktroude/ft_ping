@@ -26,6 +26,7 @@ The project strictly adheres to the behavior of the original `ping` as implement
 
 ## Project Structure
 
+```bash
 ft_ping/
 ├── include/
 │ └── ft_ping.h # Global declarations, struct definitions, function prototypes
@@ -40,6 +41,7 @@ ft_ping/
 │ └── utils.c   # Generic utilities
 ├── Makefile    # Build rules for compiling the project
 └── README.md
+```
 
 ## Usage
 
