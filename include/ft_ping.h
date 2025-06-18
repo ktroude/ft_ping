@@ -54,5 +54,6 @@ double      time_diff(struct timeval *start, struct timeval *end);
 void        int_handler(int sig);
 void        update_rtt_stats(t_ping *ping, double rtt);
 void        print_statistics(t_ping *ping);
+void        setup_socket(t_ping *ping);
 
 #endif

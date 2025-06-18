@@ -10,7 +10,7 @@
  *
  * @note Exits the program using `exit_error()` if socket creation or option setup fails.
  */
-static void setup_socket(t_ping *ping) {
+void setup_socket(t_ping *ping) {
     ping->sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (ping->sockfd < 0)
         exit_error("socket");
