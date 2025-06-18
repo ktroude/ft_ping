@@ -7,28 +7,6 @@
 int g_running = 1;
 
 /**
- * @brief Constructs an ICMP Echo Request packet with predefined payload.
- *
- * @param packet Pointer to the buffer where the packet will be built.
- * @param ping Pointer to the t_ping structure containing process ID.
- * @param seq ICMP sequence number for the current request.
- */
-void build_icmp_packet(char *packet, t_ping *ping, int seq) {
-    struct icmp *icmp = (struct icmp *)packet;
-
-    memset(packet, 0, PACKET_SIZE);
-    memset(icmp->icmp_data, 42, 56);
-
-    icmp->icmp_type = ICMP_ECHO;
-    icmp->icmp_code = 0;
-    icmp->icmp_id = htons(ping->pid);
-    icmp->icmp_seq = htons(seq);
-
-    icmp->icmp_cksum = 0;
-    icmp->icmp_cksum = checksum(packet, 64);
-}
-
-/**
  * @brief Sends an ICMP Echo Request to the target IP address.
  *
  * @param ping Pointer to the t_ping structure with destination info.
@@ -48,34 +26,6 @@ void send_ping(t_ping *ping, int seq) {
         ping->sent++;
         printf("ICMP Echo Request sent to %s\n", ping->ip_str);
     }
-}
-
-/**
- * @brief Calculates the ICMP checksum using the standard one's complement algorithm.
- *
- * @param data Pointer to the packet data.
- * @param len Length of the data to checksum.
- * @return 16-bit checksum in network byte order.
- */
-uint16_t checksum(void *data, int len) {
-    uint32_t sum = 0;
-    uint16_t *ptr = data;
-
-    while (len > 1) {
-        sum += *ptr++;
-        len -= 2;
-    }
-
-    if (len == 1) {
-        uint16_t leftover = 0;
-        *(uint8_t *)&leftover = *(uint8_t *)ptr;
-        sum += leftover;
-    }
-
-    while (sum >> 16)
-        sum = (sum & 0xFFFF) + (sum >> 16);
-
-    return ~sum;
 }
 
 /**
@@ -144,23 +94,6 @@ void handle_icmp_reply(t_ping *ping, struct icmp *icmp, int bytes, int ip_hdr_le
 }
 
 /**
- * @brief Updates the round-trip time statistics.
- *
- * @param ping Pointer to the main structure holding stats.
- * @param rtt Last measured round-trip time.
- */
-void update_rtt_stats(t_ping *ping, double rtt) {
-    ping->received++;
-    ping->rtt_total += rtt;
-    ping->rtt_count++;
-
-    if (ping->rtt_min == 0 || rtt < ping->rtt_min)
-        ping->rtt_min = rtt;
-    if (rtt > ping->rtt_max)
-        ping->rtt_max = rtt;
-}
-
-/**
  * @brief Signal handler for SIGINT (Ctrl+C).
  *        Stops the main ping loop gracefully.
  *
@@ -171,20 +104,3 @@ void int_handler(int sig) {
     g_running = 0;
 }
 
-/**
- * @brief Prints the final summary after pinging is done.
- *
- * @param ping Pointer to structure containing stats.
- */
-void print_statistics(t_ping *ping) {
-    printf("\n--- %s ping statistics ---\n", ping->hostname);
-    printf("%d packets transmitted, %d received, %.0f%% packet loss\n",
-           ping->sent,
-           ping->received,
-           ping->sent > 0 ? 100.0 * (ping->sent - ping->received) / ping->sent : 0.0);
-    if (ping->rtt_count > 0) {
-        double avg = ping->rtt_total / ping->rtt_count;
-        printf("rtt min/avg/max = %.3f/%.3f/%.3f ms\n",
-               ping->rtt_min, avg, ping->rtt_max);
-    }
-}
